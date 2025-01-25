@@ -4,18 +4,23 @@ import { useEffect, useRef, useState } from "react";
 import 'leaflet/dist/leaflet.css';
 import L from "leaflet";
 import { MaptilerLayer } from "@maptiler/leaflet-maptilersdk";
+import { GetNameKey, GetValueKey, GetPropertyByFilter} from "../../utility/utility"
 
-export const MapDashboard = () => {
+export const MapDashboard = ({
+    commodityType,
+    fertilizerType,
+    setRegionData,
+    regionState,
+    setRegionState
+}) => {
+    
     const mapContainer = useRef(null);
     const map = useRef(null);
     const geoJsonLayer = useRef(null);
     const [zoom] = useState(8);
 
-    const [regionState, setRegionState] = useState("35");
     const [history, setHistory] = useState(["35"]);
     const updatingLayer = useRef(false);
-    const [commodityType, setCommodityType] = useState("1");
-    const [fertilizerType, setFertilizerType] = useState("3");
 
     const [loading, setLoading] = useState(false); // Loading state
 
@@ -25,32 +30,6 @@ export const MapDashboard = () => {
         return `rgb(${red},${green},0)`;
     };
 
-    const getNameKey = (value) => {
-        if (value.length === 2) return 'WADMKK';
-        if (value.length === 4) return 'WADMKC';
-        if (value.length === 6) return 'WADMKD';
-        return '';
-    };
-
-    const getValueKey = (value) => {
-        if (value.length === 2) return 'KDPKAB';
-        if (value.length === 4) return 'KDCPUM';
-        if (value.length === 6) return 'KDEPUM';
-        return '';
-    };
-
-    const getPropertyByFilter = (commodity, fertilizer) => {
-        if (commodity === "1" && fertilizer === "1") return "padi_urea";
-        if (commodity === "1" && fertilizer === "2") return "padi_npk";
-        if (commodity === "1" && fertilizer === "3") return "padi_organik";
-        if (commodity === "2" && fertilizer === "1") return "jagung_urea";
-        if (commodity === "2" && fertilizer === "2") return "jagung_npk";
-        if (commodity === "2" && fertilizer === "3") return "jagung_organik";
-        if (commodity === "3" && fertilizer === "1") return "tebu_urea";
-        if (commodity === "3" && fertilizer === "2") return "tebu_npk";
-        if (commodity === "3" && fertilizer === "3") return "tebu_organik";
-        return "";
-    };
 
     const goBackToPreviousRegion = () => {
         if (history.length > 1) {
@@ -95,7 +74,8 @@ export const MapDashboard = () => {
         fetch(fetchURL)
             .then((response) => response.json())
             .then((apiData) => {
-                const values = apiData.map(d => parseFloat(d[getPropertyByFilter(commodityType, fertilizerType)]));
+                setRegionData(apiData)
+                const values = apiData.map(d => parseFloat(d[GetPropertyByFilter(commodityType, fertilizerType)]));
                 const min = Math.min(...values);
                 const max = Math.max(...values);
 
@@ -106,14 +86,14 @@ export const MapDashboard = () => {
                             ...geoJsonData,
                             features: geoJsonData.features.map((feature) => {
                                 const matchedData = apiData.find(
-                                    (data) => data[getValueKey(regionState)] === feature.properties[getValueKey(regionState)]
+                                    (data) => data[GetValueKey(regionState)] === feature.properties[GetValueKey(regionState)]
                                 );
                                 return {
                                     ...feature,
                                     properties: {
                                         ...feature.properties,
-                                        [getPropertyByFilter(commodityType, fertilizerType)]: matchedData
-                                            ? parseFloat(matchedData[getPropertyByFilter(commodityType, fertilizerType)])
+                                        [GetPropertyByFilter(commodityType, fertilizerType)]: matchedData
+                                            ? parseFloat(matchedData[GetPropertyByFilter(commodityType, fertilizerType)])
                                             : null,
                                     },
                                 };
@@ -122,7 +102,7 @@ export const MapDashboard = () => {
 
                         geoJsonLayer.current = L.geoJSON(updatedGeoJson, {
                             style: (feature) => {
-                                const value = feature.properties[getPropertyByFilter(commodityType, fertilizerType)];
+                                const value = feature.properties[GetPropertyByFilter(commodityType, fertilizerType)];
                                 return {
                                     color: value !== null ? getColor(value, min, max) : '#ccc',
                                     weight: 2,
@@ -130,11 +110,11 @@ export const MapDashboard = () => {
                                 };
                             },
                             onEachFeature: (feature, layer) => {
-                                const valueKey = getValueKey(regionState);
-                                if (feature.properties && feature.properties[getNameKey(regionState)]) {
-                                    const value = feature.properties[getPropertyByFilter(commodityType, fertilizerType)] || 'No data';
+                                const valueKey = GetValueKey(regionState);
+                                if (feature.properties && feature.properties[GetNameKey(regionState)]) {
+                                    const value = feature.properties[GetPropertyByFilter(commodityType, fertilizerType)] || 'No data';
                                     layer.bindPopup(
-                                        `<b>${feature.properties[getNameKey(regionState)]}</b><br>Value: ${value}`
+                                        `<b>${feature.properties[GetNameKey(regionState)]}</b><br>Value: ${value}`
                                     );
                                 }
 

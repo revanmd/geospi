@@ -66,6 +66,10 @@ body {
   width:500px;
 }
 
+.sign-top{
+  display:none;
+}
+
 @media only screen and (max-width: 600px) {
   .list-layer{
     width:100%;
@@ -76,5 +80,15 @@ body {
   }
   .mobile-xs{
     font-size:10px
+  }
+
+  .sign-top{
+    display:block;
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius:20px;
+    width:100px;
+    height:5px;
+    margin-left:auto;
+    margin-right:auto;
   }
 }

@@ -1,20 +1,28 @@
 "use client"
 
-import { FormatThousandDelimiter } from "@/utility/utility";
+import { FormatThousandDelimiter, GetNameKey, GetPropertyByFilter, GetValueKey } from "@/utility/utility";
 import { Col, Divider, Radio, Row, Select } from "antd"
 import { useEffect, useState } from "react"
 
 export const ListItem = ({
-    regionName,
-    regionCode,
+    regionState,
     regionData,
+    commodityType,
+    fertilizerType,
     setCommodityType,
     setFertilizerType
 }) => {
 
+    const [regionName, setRegionName] = useState("Prov. Jawa Timur")
     const [dataSource, setDataSource] = useState([])
 
-    const handleChangeCommomdity = (e) => {
+    const [summary, setSummary] = useState({
+        urea: 0,
+        npk: 0,
+        organik: 0
+    })
+
+    const handleChangeCommodity = (e) => {
         setCommodityType(e.target.value);
     }
 
@@ -23,33 +31,74 @@ export const ListItem = ({
     }
 
     useEffect(() => {
-        let data = [
-            { kode: 1, nama: "Semarang", jumlah: 1000 },
-            { kode: 2, nama: "Pati", jumlah: 891 },
-            { kode: 3, nama: "Blora", jumlah: 721 },
-            { kode: 4, nama: "Tuban", jumlah: 982 },
-            { kode: 1, nama: "Mojokerto", jumlah: 1321 },
-            { kode: 2, nama: "Pati", jumlah: 1211 },
-            { kode: 3, nama: "Blora", jumlah: 1192 },
-            { kode: 4, nama: "Tuban", jumlah: 1283 },
-            { kode: 1, nama: "Semarang", jumlah: 920 },
-            { kode: 2, nama: "Pati", jumlah: 923 },
-        ]
+        let data = []
+        let sumUrea = 0
+        let sumNPK = 0
+        let sumOrganik = 0
+
+        let regionName = ""
+        for (let index = 0; index < regionData.length; index++) {
+            // regionstate == 2
+            if (regionState.length == 2) {
+                regionName = "Prov. Jawa Timur"
+                break
+            }
+
+            // regionstate == 4
+            if (regionState.length == 4) {
+                if (regionData[index].KDPKAB == regionState) {
+                    regionName = regionData[index].WADMKK
+                    break
+                }
+            }
+
+            // regionstate == 6
+            if (regionState.length == 6) {
+                if (regionData[index].KDCPUM == regionState) {
+                    regionName = regionData[index].WADMKC
+                    break
+                }
+            }
+        }
+        setRegionName(regionName)
+
+        regionData.forEach(record => {
+            sumUrea += parseFloat(record[GetPropertyByFilter(commodityType, "1")])
+            sumNPK += parseFloat(record[GetPropertyByFilter(commodityType, "2")])
+            sumOrganik += parseFloat(record[GetPropertyByFilter(commodityType, "3")])
+
+            let jumlah = record[GetPropertyByFilter(commodityType, fertilizerType)] / 1000
+            let nama = record[GetNameKey(regionState)]
+            let kode = record[GetValueKey(regionState)]
+
+            data.push({
+                kode: kode,
+                nama: nama,
+                jumlah: jumlah
+            })
+        });
+ 
+        sumUrea = FormatThousandDelimiter(sumUrea)
+        sumNPK = FormatThousandDelimiter(sumNPK)
+        sumOrganik = FormatThousandDelimiter(sumOrganik)
+
+        setSummary({
+            urea: sumUrea,
+            npk: sumNPK,
+            organik: sumOrganik
+        })
 
         const sortedData = data.sort((a, b) => b.jumlah - a.jumlah);
         setDataSource(sortedData)
+    }, [regionData])
 
-
-    }, [])
-
-    useEffect(() => {
-        console.log(regionCode)
-    }, [regionCode])
 
     return (
         <div
             className="shadow overflow-auto scroll-container bg-gray-50 list-layer"
         >
+            <div className="sign-top"> </div>
+
             {/* Region Title */}
             <div className="text-xl font-semibold mt-5 mb-5">
                 {regionName}
@@ -95,14 +144,14 @@ export const ListItem = ({
                         </p>
                     </Col>
                     <Col span={24}>
-                        <Radio.Group 
-                            block 
-                            defaultValue={1}
-                            onChange={handleChangeCommomdity}
+                        <Radio.Group
+                            block
+                            defaultValue={"1"}
+                            onChange={handleChangeCommodity}
                         >
-                            <Radio value={1}>Padi</Radio>
-                            <Radio value={2}>Jagung</Radio>
-                            <Radio value={3}>Tebu</Radio>
+                            <Radio value={"1"}>Padi</Radio>
+                            <Radio value={"2"}>Jagung</Radio>
+                            <Radio value={"3"}>Tebu</Radio>
                         </Radio.Group>
                     </Col>
                     <Col span={24}>
@@ -111,14 +160,14 @@ export const ListItem = ({
                         </p>
                     </Col>
                     <Col span={24}>
-                        <Radio.Group 
-                            block 
-                            defaultValue={1}
+                        <Radio.Group
+                            block
+                            defaultValue={"1"}
                             onChange={handleChangeFertilizer}
                         >
-                            <Radio value={1}>Urea</Radio>
-                            <Radio value={2}>NPK</Radio>
-                            <Radio value={3}>Organik</Radio>
+                            <Radio value={"1"}>Urea</Radio>
+                            <Radio value={"2"}>NPK</Radio>
+                            <Radio value={"3"}>Organik</Radio>
                         </Radio.Group>
                     </Col>
                 </Row>
@@ -152,7 +201,7 @@ export const ListItem = ({
                             Urea
                         </div>
                         <div className="font-semibold">
-                            4.000 ton
+                            {summary?.urea} ton
                         </div>
                     </div>
                     <div className="flex justify-between mb-1">
@@ -160,15 +209,15 @@ export const ListItem = ({
                             NPK
                         </div>
                         <div className="font-semibold">
-                            1.200 ton
+                            {summary?.npk} ton
                         </div>
                     </div>
                     <div className="flex justify-between mb-1">
                         <div>
-                            Za
+                            Organik
                         </div>
                         <div className="font-semibold">
-                            1.321 ton
+                            {summary?.organik} ton
                         </div>
                     </div>
                 </div>
@@ -185,7 +234,7 @@ export const ListItem = ({
                                 </div>
                                 <div className="">
 
-                                    {FormatThousandDelimiter(item.jumlah)}
+                                    {FormatThousandDelimiter(item?.jumlah ? item.jumlah : 0)}
                                     <span className="ml-1">ton</span>
                                 </div>
                             </div>
