@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import 'leaflet/dist/leaflet.css';
 import L from "leaflet";
 import { MaptilerLayer } from "@maptiler/leaflet-maptilersdk";
-import { GetNameKey, GetValueKey, GetPropertyByFilter} from "../../utility/utility"
+import { GetNameKey, GetValueKey, GetPropertyByFilter, FormatThousandDelimiter} from "../../utility/utility"
 
 export const MapDashboard = ({
     commodityType,
@@ -111,18 +111,34 @@ export const MapDashboard = ({
                             },
                             onEachFeature: (feature, layer) => {
                                 const valueKey = GetValueKey(regionState);
+                            
                                 if (feature.properties && feature.properties[GetNameKey(regionState)]) {
-                                    const value = feature.properties[GetPropertyByFilter(commodityType, fertilizerType)] || 'No data';
+                                    let valueUrea = feature.properties[GetPropertyByFilter(commodityType, "1")];
+                                    let valueNPK = feature.properties[GetPropertyByFilter(commodityType, "2")];
+                                    let valueOrganik = feature.properties[GetPropertyByFilter(commodityType, "3")];
+
+                                    valueUrea = valueUrea ? FormatThousandDelimiter(parseFloat(valueUrea/1000)) : "0";
+                                    valueNPK = valueNPK ? FormatThousandDelimiter(parseFloat(valueNPK/1000)) : "0";
+                                    valueOrganik = valueOrganik ? FormatThousandDelimiter(parseFloat(valueOrganik/1000)) : "0";
                                     layer.bindPopup(
-                                        `<b>${feature.properties[GetNameKey(regionState)]}</b><br>Value: ${value}`
+                                        `
+                                            <b>${feature.properties[GetNameKey(regionState)]}</b>
+                                            <br>Urea : ${valueUrea} Ton\
+                                            <br>NPK : ${valueNPK} Ton\
+                                            <br>Organik : ${valueOrganik} Ton\
+                                        `
                                     );
                                 }
-
+                            
                                 layer.on('click', () => {
-                                    const nextRegionState = feature.properties[valueKey];
-                                    if (nextRegionState) {
-                                        setHistory([...history, nextRegionState]);
-                                        setRegionState(nextRegionState);
+                                    if (regionState.length < 6) { // Disable click when regionState length is 6
+                                        const nextRegionState = feature.properties[valueKey];
+                                        if (nextRegionState) {
+                                            setHistory([...history, nextRegionState]);
+                                            setRegionState(nextRegionState);
+                                        }
+                                    } else {
+                                        console.warn("Click event disabled: Maximum region depth reached.");
                                     }
                                 });
                             },
@@ -180,6 +196,7 @@ export const MapDashboard = ({
             >
                 Kembali ke Wilayah Sebelumnya
             </button>
+            
             <div ref={mapContainer} className="map" style={{ height: "100%", width: "100%" }} />
         </div>
     );

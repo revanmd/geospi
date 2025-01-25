@@ -100,7 +100,7 @@ export const ListItem = ({
             <div className="sign-top"> </div>
 
             {/* Region Title */}
-            <div className="text-xl font-semibold mt-5 mb-5">
+            <div className="text-xl font-semibold sticky top-0 bg-gray-50 py-5 z-10 border-gray">
                 {regionName}
             </div>
 
