@@ -77,10 +77,10 @@ export const ListItem = ({
                 jumlah: jumlah
             })
         });
- 
-        sumUrea = FormatThousandDelimiter(sumUrea)
-        sumNPK = FormatThousandDelimiter(sumNPK)
-        sumOrganik = FormatThousandDelimiter(sumOrganik)
+        
+        sumUrea = FormatThousandDelimiter((sumUrea/1000).toFixed(0))
+        sumNPK = FormatThousandDelimiter((sumNPK/1000).toFixed(0))
+        sumOrganik = FormatThousandDelimiter((sumOrganik/1000).toFixed(0))
 
         setSummary({
             urea: sumUrea,
