@@ -48,14 +48,7 @@ export const ListItem = ({
 
     return (
         <div
-            style={{
-                width: '400px',
-                paddingLeft: '20px',
-                paddingRight: '20px',
-                zIndex: 999,
-                height: '100%'
-            }}
-            className="shadow overflow-auto scroll-container"
+            className="shadow overflow-auto scroll-container bg-gray-50 list-layer"
         >
             {/* Region Title */}
             <div className="text-xl font-semibold mt-5 mb-5">

@@ -12,15 +12,17 @@ export const MapDashboard = () => {
     const [zoom] = useState(8);
 
     const [regionState, setRegionState] = useState("35");
-    const [history, setHistory] = useState(["35"]); // History of region codes
-    const updatingLayer = useRef(false); // To track if layer is being updated
+    const [history, setHistory] = useState(["35"]);
+    const updatingLayer = useRef(false);
     const [commodityType, setCommodityType] = useState("1");
     const [fertilizerType, setFertilizerType] = useState("3");
+
+    const [loading, setLoading] = useState(false); // Loading state
 
     const getColor = (value, min, max) => {
         const red = Math.floor((1 - (value - min) / (max - min)) * 255);
         const green = Math.floor(((value - min) / (max - min)) * 255);
-        return `rgb(${red},${green},0)`; // Grading from red to green
+        return `rgb(${red},${green},0)`;
     };
 
     const getNameKey = (value) => {
@@ -53,19 +55,18 @@ export const MapDashboard = () => {
     const goBackToPreviousRegion = () => {
         if (history.length > 1) {
             const newHistory = [...history];
-            newHistory.pop(); // Remove the current region
-            setRegionState(newHistory[newHistory.length - 1]); // Set to the previous region
-            setHistory(newHistory); // Update history
+            newHistory.pop();
+            setRegionState(newHistory[newHistory.length - 1]);
+            setHistory(newHistory);
         }
     };
 
     useEffect(() => {
         if (map.current) return;
 
-        // Initialize the map
         map.current = new L.Map(mapContainer.current, { zoom });
 
-        const mtLayer = new MaptilerLayer({
+        new MaptilerLayer({
             style: "https://api.maptiler.com/maps/landscape/style.json?key=7f87DPhFubxv6U7zUuCN",
             apiKey: "7f87DPhFubxv6U7zUuCN",
         }).addTo(map.current);
@@ -74,12 +75,12 @@ export const MapDashboard = () => {
     useEffect(() => {
         if (!map.current || updatingLayer.current) return;
 
-        updatingLayer.current = true; // Set the flag to indicate the layer is being updated
+        updatingLayer.current = true;
+        setLoading(true); // Show loading screen
 
-        // Remove the existing GeoJSON layer if it exists
         if (geoJsonLayer.current) {
             map.current.removeLayer(geoJsonLayer.current);
-            geoJsonLayer.current = null; // Clear the reference
+            geoJsonLayer.current = null;
         }
 
         let fetchURL = "";
@@ -119,7 +120,6 @@ export const MapDashboard = () => {
                             }),
                         };
 
-                        // Add the new GeoJSON layer
                         geoJsonLayer.current = L.geoJSON(updatedGeoJson, {
                             style: (feature) => {
                                 const value = feature.properties[getPropertyByFilter(commodityType, fertilizerType)];
@@ -138,36 +138,56 @@ export const MapDashboard = () => {
                                     );
                                 }
 
-                                // Add click event listener
                                 layer.on('click', () => {
                                     const nextRegionState = feature.properties[valueKey];
                                     if (nextRegionState) {
-                                        setHistory([...history, nextRegionState]); // Add to history
-                                        setRegionState(nextRegionState); // Update regionState
+                                        setHistory([...history, nextRegionState]);
+                                        setRegionState(nextRegionState);
                                     }
                                 });
                             },
                         }).addTo(map.current);
 
-                        // Fit bounds to the new layer
                         const bounds = geoJsonLayer.current.getBounds();
                         map.current.fitBounds(bounds);
 
-                        updatingLayer.current = false; // Reset the flag
+                        updatingLayer.current = false;
+                        setLoading(false); // Hide loading screen
                     })
                     .catch((error) => {
                         console.error("Error loading GeoJSON:", error);
-                        updatingLayer.current = false; // Reset the flag on error
+                        updatingLayer.current = false;
+                        setLoading(false); // Hide loading screen
                     });
             })
             .catch((error) => {
                 console.error("Error fetching API data:", error);
-                updatingLayer.current = false; // Reset the flag on error
+                updatingLayer.current = false;
+                setLoading(false); // Hide loading screen
             });
     }, [regionState, commodityType, fertilizerType]);
 
     return (
         <div className="map-wrap" style={{ height: "100vh", width: "100%" }}>
+            {loading && (
+                <div
+                    className="loading-screen"
+                    style={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        width: "100%",
+                        height: "100%",
+                        background: "rgba(255, 255, 255, 0.8)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        zIndex: 1000,
+                    }}
+                >
+                    <div>Loading...</div>
+                </div>
+            )}
             <button
                 onClick={goBackToPreviousRegion}
                 hidden={history.length <= 1}
@@ -176,7 +196,7 @@ export const MapDashboard = () => {
                     padding: "10px",
                     cursor: history.length > 1 ? "pointer" : "not-allowed",
                 }}
-                className="absolute top-0 left-1/2 -translate-x-1/2 mt-2 bordered bg-gray-50 rounded font-semibold text-xs"
+                className="absolute top-0 left-1/2 -translate-x-1/2 mt-2 bordered bg-gray-50 rounded font-semibold text-xs mobile-xs"
             >
                 Kembali ke Wilayah Sebelumnya
             </button>

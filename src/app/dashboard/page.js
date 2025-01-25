@@ -11,7 +11,7 @@ export const LazyMap = dynamic(() =>
 )
 
 export default function PageDashboard() {
-    const [isSideActive, setIsSideActive] = useState(true, )
+    const [isSideActive, setIsSideActive] = useState(true)
     const [currentRegion, setCurrentRegion] = useState({
         name: 'Jawa Timur',
         code: '35'
