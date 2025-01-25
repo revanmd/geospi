@@ -84,11 +84,11 @@ export const MapDashboard = () => {
 
         let fetchURL = "";
         if (regionState.length === 2) {
-            fetchURL = 'http://localhost:3000/api/read-kab?KDPPUM=' + regionState;
+            fetchURL = '/api/read-kab?KDPPUM=' + regionState;
         } else if (regionState.length === 4) {
-            fetchURL = 'http://localhost:3000/api/read-kec?KDPKAB=' + regionState;
+            fetchURL = '/api/read-kec?KDPKAB=' + regionState;
         } else if (regionState.length === 6) {
-            fetchURL = 'http://localhost:3000/api/read-all?KDCPUM=' + regionState;
+            fetchURL = '/api/read-all?KDCPUM=' + regionState;
         }
 
         fetch(fetchURL)
@@ -98,7 +98,7 @@ export const MapDashboard = () => {
                 const min = Math.min(...values);
                 const max = Math.max(...values);
 
-                fetch(`http://localhost:3000/geojson/${regionState}.geojson`)
+                fetch(`/geojson/${regionState}.geojson`)
                     .then((response) => response.json())
                     .then((geoJsonData) => {
                         const updatedGeoJson = {
