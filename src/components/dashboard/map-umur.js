@@ -4,11 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import 'leaflet/dist/leaflet.css';
 import L from "leaflet";
 import { MaptilerLayer } from "@maptiler/leaflet-maptilersdk";
-import { GetNameKey, GetValueKey, GetPropertyByFilter, FormatThousandDelimiter } from "../../utility/utility";
+import { GetNameKey, GetValueKey, GetPropertyUmurByFilter, FormatThousandDelimiter } from "../../utility/utility";
 
 export const MapDashboard = ({
-    commodityType,
-    fertilizerType,
+    umurType,
     setRegionData,
     regionState,
     setRegionState
@@ -44,12 +43,12 @@ export const MapDashboard = ({
         map.current = new L.Map(mapContainer.current, { zoom, center: [0, 0] });
 
         // Add the TileServer-GL XYZ layer
-        // L.tileLayer('http://localhost:8080/data/OUTPUT_FILE_PNG_FULL/{z}/{x}/{y}.png', {
-        //     attribution: '&copy; <a href="http://localhost:8080/data/OUTPUT_FILE_PNG_FULL">Raster Umur Tanaman</a>',
-        //     maxZoom: 18,
-        //     tileSize: 256,
-        //     zoomOffset: 0,
-        // }).addTo(map.current);
+        L.tileLayer('https://tile.digitalisasi-pi.com/data/planting_phase_esri/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://tile.digitalisasi-pi.com/data/planting_phase_esri/{z}/{x}/{y}.png">Raster Umur Tanaman</a>',
+            maxZoom: 14,
+            tileSize: 256,
+            zoomOffset: 0,
+        }).addTo(map.current);
 
         // Optional: Add another base map layer using Maptiler
         new MaptilerLayer({
@@ -76,18 +75,19 @@ export const MapDashboard = ({
 
         let fetchURL = "";
         if (regionState.length === 2) {
-            fetchURL = '/api/read-kab?KDPPUM=' + regionState;
+            fetchURL = '/api/read-umur-kab?KDPPUM=' + regionState;
         } else if (regionState.length === 4) {
-            fetchURL = '/api/read-kec?KDPKAB=' + regionState;
+            fetchURL = '/api/read-umur-kec?KDPKAB=' + regionState;
         } else if (regionState.length === 6) {
-            fetchURL = '/api/read-all?KDCPUM=' + regionState;
+            fetchURL = '/api/read-umur-all?KDCPUM=' + regionState;
         }
 
         fetch(fetchURL)
             .then((response) => response.json())
             .then((apiData) => {
                 setRegionData(apiData);
-                const values = apiData.map(d => parseFloat(d[GetPropertyByFilter(commodityType, fertilizerType)]));
+                const values = apiData.map(d => parseFloat(d[GetPropertyUmurByFilter(umurType)]));
+
                 const min = Math.min(...values);
                 const max = Math.max(...values);
 
@@ -100,44 +100,56 @@ export const MapDashboard = ({
                                 const matchedData = apiData.find(
                                     (data) => data[GetValueKey(regionState)] === feature.properties[GetValueKey(regionState)]
                                 );
+                                
                                 return {
                                     ...feature,
                                     properties: {
                                         ...feature.properties,
-                                        [GetPropertyByFilter(commodityType, fertilizerType)]: matchedData
-                                            ? parseFloat(matchedData[GetPropertyByFilter(commodityType, fertilizerType)])
-                                            : null,
+                                        [GetPropertyUmurByFilter(umurType)]: matchedData
+                                            ? parseFloat(matchedData[GetPropertyUmurByFilter(umurType)])
+                                            : 0,
                                     },
                                 };
                             }),
                         };
 
+                        console.log(updatedGeoJson)
+
                         geoJsonLayer.current = L.geoJSON(updatedGeoJson, {
                             style: (feature) => {
-                                const value = feature.properties[GetPropertyByFilter(commodityType, fertilizerType)];
+                                const value = feature.properties[GetPropertyUmurByFilter(umurType)];
                                 return {
                                     color: value !== null ? getColor(value, min, max) : '#ccc',
-                                    weight: 1,
-                                    opacity: 0.4,
+                                    weight: 3,
+                                    opacity: 0.7,
                                 };
                             },
                             onEachFeature: (feature, layer) => {
                                 const valueKey = GetValueKey(regionState);
                             
                                 if (feature.properties && feature.properties[GetNameKey(regionState)]) {
-                                    let valueUrea = feature.properties[GetPropertyByFilter(commodityType, "1")];
-                                    let valueNPK = feature.properties[GetPropertyByFilter(commodityType, "2")];
-                                    let valueOrganik = feature.properties[GetPropertyByFilter(commodityType, "3")];
-
-                                    valueUrea = valueUrea ? FormatThousandDelimiter(parseFloat(valueUrea / 1000)) : "0";
-                                    valueNPK = valueNPK ? FormatThousandDelimiter(parseFloat(valueNPK / 1000)) : "0";
-                                    valueOrganik = valueOrganik ? FormatThousandDelimiter(parseFloat(valueOrganik / 1000)) : "0";
+                                    let value1 = feature.properties[GetPropertyUmurByFilter("1")] ||= 0;
+                                    let value2 = feature.properties[GetPropertyUmurByFilter("2")] ||= 0;
+                                    let value3 = feature.properties[GetPropertyUmurByFilter("3")] ||= 0;
+                                    let value4 = feature.properties[GetPropertyUmurByFilter("4")] ||= 0;
+                                    let value5 = feature.properties[GetPropertyUmurByFilter("5")] ||= 0;
+                                    let value6 = feature.properties[GetPropertyUmurByFilter("6")] ||= 0;
+                                    let value7 = feature.properties[GetPropertyUmurByFilter("7")] ||= 0;
+                                    let value8 = feature.properties[GetPropertyUmurByFilter("8")] ||= 0;
+                                    let value9 = feature.properties[GetPropertyUmurByFilter("9")] ||= 0;
+                                    
                                     layer.bindPopup(
                                         `
                                             <b>${feature.properties[GetNameKey(regionState)]}</b>
-                                            <br>Urea : ${valueUrea} Ton\
-                                            <br>NPK : ${valueNPK} Ton\
-                                            <br>Organik : ${valueOrganik} Ton\
+                                            <br>Bera : ${value1} Ha\
+                                            <br>Penggenangan : ${value2} Ha\
+                                            <br>Tanam (1 - 15 HST) : ${value3} Ha\
+                                            <br>Vegetatif 1 (1 - 15 HST) : ${value4} Ha\
+                                            <br>Vegetatif 2 (1 - 15 HST) : ${value5} Ha\
+                                            <br>Maksimum Vegetatif (1 - 15 HST) : ${value6} Ha\
+                                            <br>Generatif 1 (1 - 15 HST) : ${value7} Ha\
+                                            <br>Generatif 2 (1 - 15 HST) : ${value8} Ha\
+                                            <br>Panen (1 - 15 HST) : ${value9} Ha\
                                         `
                                     );
                                 }
@@ -173,7 +185,7 @@ export const MapDashboard = ({
                 updatingLayer.current = false;
                 setLoading(false); // Hide loading screen
             });
-    }, [regionState, commodityType, fertilizerType]);
+    }, [regionState, umurType]);
 
     return (
         <div className="map-wrap" style={{ height: "100vh", width: "100%" }}>

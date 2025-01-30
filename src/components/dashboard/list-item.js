@@ -7,13 +7,12 @@ import { useEffect, useState } from "react"
 export const ListItem = ({
     regionState,
     regionData,
+    setRegionName,
     commodityType,
     fertilizerType,
     setCommodityType,
     setFertilizerType
 }) => {
-
-    const [regionName, setRegionName] = useState("Prov. Jawa Timur")
     const [dataSource, setDataSource] = useState([])
 
     const [summary, setSummary] = useState({
@@ -77,10 +76,10 @@ export const ListItem = ({
                 jumlah: jumlah
             })
         });
-        
-        sumUrea = FormatThousandDelimiter((sumUrea/1000).toFixed(0))
-        sumNPK = FormatThousandDelimiter((sumNPK/1000).toFixed(0))
-        sumOrganik = FormatThousandDelimiter((sumOrganik/1000).toFixed(0))
+
+        sumUrea = FormatThousandDelimiter((sumUrea / 1000).toFixed(0))
+        sumNPK = FormatThousandDelimiter((sumNPK / 1000).toFixed(0))
+        sumOrganik = FormatThousandDelimiter((sumOrganik / 1000).toFixed(0))
 
         setSummary({
             urea: sumUrea,
@@ -94,52 +93,23 @@ export const ListItem = ({
 
 
     return (
-        <div
-            className="shadow overflow-auto scroll-container bg-gray-50 list-layer"
-        >
-            <div className="sign-top"> </div>
-
-            {/* Region Title */}
-            <div className="text-xl font-semibold sticky top-0 bg-gray-50 py-5 z-10 border-gray">
-                {regionName}
-            </div>
-
-            <div className="flex space-x-2">
-                <div className="flex-1">
-                    <Select
-                        defaultValue={"Desember"}
-                        options={[
-                            { value: 'Desember', label: 'Desember' }
-                        ]}
-                        style={{
-                            width: '100%'
-                        }}
-                        size="large"
-                    />
-                </div>
-                <div className="flex-1/2">
-                    <Select
-                        defaultValue={"2024"}
-                        options={[
-                            { value: '2024', label: '2024' }
-                        ]}
-                        style={{
-                            width: '100%'
-                        }}
-                        size="large"
-                    />
-                </div>
-            </div>
-
-
+        <div>
             {/* Card Box */}
-            <div
-                className="mt-3 bg-white p-4 rounded-lg border"
-            >
+            <div className="bg-white mt-2 p-4 rounded-lg border">
+                <div className="mb-3">
+                    <span className="text-sm font-semibold">
+                        Kebutuhan Pupuk
+                    </span>
+                    <br />
+                    <span className="text-xs font-normal  text-tertiary">
+                        Informasi ini bersifat estimasi dan mungkin mengalami perubahan sesuai dengan kondisi di lapangan.
+                    </span>
+                </div>
+
                 {/* Option */}
-                <Row>
+                <Row className="mb-3">
                     <Col span={24}>
-                        <p className="font-semibold text-sm mb-2">
+                        <p className="font-semibold text-xs mb-2">
                             Komoditas :
                         </p>
                     </Col>
@@ -148,6 +118,7 @@ export const ListItem = ({
                             block
                             defaultValue={"1"}
                             onChange={handleChangeCommodity}
+                            
                         >
                             <Radio value={"1"}>Padi</Radio>
                             <Radio value={"2"}>Jagung</Radio>
@@ -155,7 +126,7 @@ export const ListItem = ({
                         </Radio.Group>
                     </Col>
                     <Col span={24}>
-                        <p className="font-semibold text-sm mt-4 mb-2">
+                        <p className="font-semibold text-xs mt-3 mb-3">
                             Jenis Pupuk :
                         </p>
                     </Col>
@@ -171,23 +142,12 @@ export const ListItem = ({
                         </Radio.Group>
                     </Col>
                 </Row>
+
+                 
                 <Divider />
-
-
-                <div className="mb-3">
-                    <span className="text-sm font-semibold">
-                        Kebutuhan Pupuk (kg)
-                    </span>
-                    <br />
-                    <span className="text-xs font-normal  text-tertiary">
-                        Informasi ini bersifat estimasi dan mungkin mengalami perubahan sesuai dengan kondisi di lapangan.
-                    </span>
-                </div>
-
-
-
+                
                 {/* Fertilizer Need Detail */}
-                <div className="p-3 rounded-lg mb-3 font-semibold"
+                <div className="p-3 rounded-lg mb-3 font-semibold mt-3"
                     style={{
                         backgroundColor: '#EBF9FF'
                     }}
@@ -195,8 +155,7 @@ export const ListItem = ({
                     <h2 className="text-sm text-blue-500 mb-3">
                         Kebutuhan Total
                     </h2>
-                    <hr></hr>
-                    <div className="flex justify-between mt-3 mb-1">
+                    <div className="flex justify-between mb-0.5">
                         <div>
                             Urea
                         </div>
@@ -204,7 +163,7 @@ export const ListItem = ({
                             {summary?.urea} ton
                         </div>
                     </div>
-                    <div className="flex justify-between mb-1">
+                    <div className="flex justify-between mb-0.5">
                         <div>
                             NPK
                         </div>
@@ -225,10 +184,10 @@ export const ListItem = ({
 
 
                 {/* Region List  */}
-                <div className="m-2">
+                <div className="m-5">
                     {dataSource.map((item) => {
                         return (
-                            <div className="flex justify-between mb-1 text-xs" key={item.key} >
+                            <div className="flex justify-between mb-1.5 text-xs" key={item.key} >
                                 <div className="">
                                     {item.nama}
                                 </div>

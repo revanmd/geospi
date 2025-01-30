@@ -35,3 +35,7 @@ export const GetPropertyByFilter = (commodity, fertilizer) => {
     if (commodity === "3" && fertilizer === "3") return "tebu_organik";
     return "";
 };
+
+export const GetPropertyUmurByFilter = (umur) => {
+    return "value_" + umur
+};
