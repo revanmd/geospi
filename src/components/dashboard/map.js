@@ -44,12 +44,12 @@ export const MapDashboard = ({
         map.current = new L.Map(mapContainer.current, { zoom, center: [0, 0] });
 
         // Add the TileServer-GL XYZ layer
-        // L.tileLayer('http://localhost:8080/data/OUTPUT_FILE_PNG_FULL/{z}/{x}/{y}.png', {
-        //     attribution: '&copy; <a href="http://localhost:8080/data/OUTPUT_FILE_PNG_FULL">Raster Umur Tanaman</a>',
-        //     maxZoom: 18,
-        //     tileSize: 256,
-        //     zoomOffset: 0,
-        // }).addTo(map.current);
+        L.tileLayer('https://tile.digitalisasi-pi.com/data/merged_output_jatim_rgb/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://tile.digitalisasi-pi.com/data/merged_output_jatim_rgb/{z}/{x}/{y}.png">Komoditas</a>',
+            maxZoom: 18,
+            tileSize: 256,
+            zoomOffset: 0,
+        }).addTo(map.current);
 
         // Optional: Add another base map layer using Maptiler
         new MaptilerLayer({
@@ -221,8 +221,28 @@ export const MapDashboard = ({
             >
                 Zoom : {zoom}
             </div>
+            
 
             <div ref={mapContainer} className="map" style={{ height: "100%", width: "100%" }} />
+            
+
+            <div
+                style={{ position:'absolute', right:'10px', top:'50px', zIndex:999, backgroundColor:'#f9fafb' }}
+                className="rounded p-2"
+            >
+                <div>
+                    <div className="inline-block" style={{backgroundColor:'#21810f', width:'10px', height:'10px'}}></div>
+                    <div className="inline-block ml-2 text-xs">Padi</div>
+                </div>
+                <div>
+                    <div className="inline-block" style={{backgroundColor:'#ffd901', width:'10px', height:'10px'}}></div>
+                    <div className="inline-block ml-2 text-xs">Jagung</div>
+                </div>
+                <div>
+                    <div className="inline-block" style={{backgroundColor:'#4ea7b1', width:'10px', height:'10px'}}></div>
+                    <div className="inline-block ml-2 text-xs">Tebu</div>
+                </div>
+            </div>
         </div>
     );
 };

@@ -235,6 +235,20 @@ export const MapDashboard = ({
             </div>
 
             <div ref={mapContainer} className="map" style={{ height: "100%", width: "100%" }} />
+
+            <div
+                style={{ position:'absolute', right:'10px', top:'50px', zIndex:999, backgroundColor:'#f9fafb' }}
+                className="rounded p-2"
+            >
+                <div>
+                    <div className="inline-block" style={{backgroundColor:'#ffca91', width:'10px', height:'10px'}}></div>
+                    <div className="inline-block ml-2 text-xs">Bera</div>
+                </div>
+                <div>
+                    <div className="inline-block" style={{backgroundColor:'#a8d6e6', width:'10px', height:'10px'}}></div>
+                    <div className="inline-block ml-2 text-xs">Pengairan</div>
+                </div>
+            </div>
         </div>
     );
 };
