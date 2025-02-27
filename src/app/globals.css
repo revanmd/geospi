@@ -91,4 +91,12 @@ body {
     margin-left:auto;
     margin-right:auto;
   }
+
+  .disnone{
+    display:none !important;
+  }
+}
+
+.ant-spin-nested-loading{
+  background-color: white !important;
 }

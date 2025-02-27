@@ -1,133 +1,137 @@
 "use client"
 
-import { LayoutDashboard } from "@/components/layout/layout-dashboard"
+import { Button, Col, Form, Input, message, Row, Spin } from "antd";
+import axios from "axios";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
-import { PiPlant } from "react-icons/pi";
-import { IoSunny } from "react-icons/io5";
-
-import dynamic from "next/dynamic"
-import { useState } from "react"
-
-// Components
-import { ListItem } from "@/components/dashboard/list-item"
-import { ListUmur } from "@/components/dashboard/list-umur"
-import Switch from "react-switch"
+export default function PageHandler() {
+    const router = useRouter()
+    const [FormLogin] = Form.useForm()
+    const [loading, setLoading] = useState(false)
 
 
-export const LazyMap = dynamic(() =>
-    import('../components/dashboard/map').then((mod) => mod.MapDashboard), { ssr: false }
-)
-export const LazyMapUmur = dynamic(() =>
-    import('../components/dashboard/map-umur').then((mod) => mod.MapDashboard), { ssr: false }
-)
+    const handleLogin = async () => {
+        try {
+            setLoading(true);
+            const values = FormLogin.getFieldsValue();
 
-export default function PageDashboard() {
-    const [activeMenu, setActiveMenu] = useState("fertilizer")
-
-    const [umurType, setUmurType] = useState("1")
-    const [commodityType, setCommodityType] = useState("1")
-    const [fertilizerType, setFertilizerType] = useState("1")
-
-    const [regionState, setRegionState] = useState("35")
-    const [regionName, setRegionName] = useState("Prov Jawa Timur")
-    const [regionData, setRegionData] = useState([])
+            const response = await axios.post("/api/auth", {
+                username: values.username,
+                password: values.password
+            }, {
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            });
+            const data = await response.data
+            if (response.status == 200) {
+                if (typeof window !== 'undefined') {
+                    window.localStorage.setItem("dev-token", 'just-a-dev-token')
+                    router.push("/dashboard")
+                }
+                message.success("Login successful!");
+                setLoading(false);
+            } else {
+                message.error(data.error || "Login failed!");
+            }
+        } catch (error) {
+            console.error("Login error:", error);
+            message.error("Invalid username and password");
+            setLoading(false);
+        }
+    };
 
     return (
-        <LayoutDashboard>
-            <div
-                className="shadow overflow-auto scroll-container bg-gray-50 list-layer"
-            >
-                <div className="sign-top"> </div>
+        <Spin
+            spinning={loading}
+        >
+            <main>
+                <Row>
+                    <Col lg={12} span={24} className="bg-white h-screen">
 
-                {/* Region Title */}
-                <div className="flex justify-between items-center">
-                    <div className="text-xl font-semibold sticky top-0 bg-gray-50 py-5 z-10 border-gray">
-                        {regionName}
-                    </div>
+                        <svg viewBox="0 0 720 528" fill="none" xmlns="http://www.w3.org/2000/svg" style={{
+                            position: 'absolute',
+                        }}>
+                            <mask id="mask0_544_3979" maskUnits="userSpaceOnUse" x="0" y="-192" width="720" height="720">
+                                <g clip-path="url(#clip0_544_3979)">
+                                    <path d="M0 -192V528" stroke="#EBEBEB" />
+                                    <path d="M80 -192V528" stroke="#EBEBEB" />
+                                    <path d="M160 -192V528" stroke="#EBEBEB" />
+                                    <path d="M240 -192V528" stroke="#EBEBEB" />
+                                    <path d="M320 -192V528" stroke="#EBEBEB" />
+                                    <path d="M400 -192V528" stroke="#EBEBEB" />
+                                    <path d="M480 -192V528" stroke="#EBEBEB" />
+                                    <path d="M560 -192V528" stroke="#EBEBEB" />
+                                    <path d="M640 -192V528" stroke="#EBEBEB" />
+                                    <path d="M720 -192V528" stroke="#EBEBEB" />
+                                    <path d="M0 48H720" stroke="#EBEBEB" />
+                                    <path d="M0 128H720" stroke="#EBEBEB" />
+                                    <path d="M0 208H720" stroke="#EBEBEB" />
+                                    <path d="M0 288H720" stroke="#EBEBEB" />
+                                    <path d="M0 368H720" stroke="#EBEBEB" />
+                                    <path d="M0 448H720" stroke="#EBEBEB" />
+                                    <path d="M0 528H720" stroke="#EBEBEB" />
+                                </g>
+                            </mask>
+                            <g mask="url(#mask0_544_3979)">
+                                <circle cx="360" cy="168" r="360" fill="url(#paint0_radial_544_3979)" fill-opacity="0.2" />
+                            </g>
+                            <defs>
+                                <radialGradient id="paint0_radial_544_3979" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(360 168) rotate(90) scale(360)">
+                                    <stop stop-color="#005BA2" />
+                                    <stop offset="1" stop-color="#005BA2" stop-opacity="0" />
+                                </radialGradient>
+                                <clipPath id="clip0_544_3979">
+                                    <rect width="720" height="720" fill="white" transform="translate(0 -192)" />
+                                </clipPath>
+                            </defs>
+                        </svg>
 
-                    <Switch
-                        checked={activeMenu == "fertilizer" ? true : false}
-                        onChange={(checked) => {
-                            if (checked) {
-                                setActiveMenu("fertilizer")
-                            } else {
-                                setActiveMenu("umur")
-                            }
-                        }}
-                        width={60}
-                        offColor="#96cd4f"
-                        onColor="#58782e"
-                        uncheckedIcon={
-                            <div style={{
-                                height: "100%",
-                                display: "flex",
-                                justifyContent: "center",
-                                alignItems: "center",
-                                color: 'white'
-                            }}>
-                                <IoSunny className="text-xl" />
+
+                        <div className="w-5/6 ml-auto mr-auto absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                            <div className="text-center">
+                                <h1 className="text-3xl font-semibold text-black">Selamat Datang</h1>
+                                <h2 className="px-8 text-sm text-gray-500 mt-3">Monitor kebutuhan pupuk sesuai umur tanam dan komoditas untuk memudahkan penentuan target yang lebih akurat dan efisien</h2>
                             </div>
-                        }
-                        checkedIcon={
-                            <div style={{
-                                height: "100%",
-                                display: "flex",
-                                justifyContent: "center",
-                                alignItems: "center",
-                            }}>
-                                <PiPlant className="text-lg text-white" />
+
+                            <div className="w-4/6 ml-auto mr-auto mt-5">
+                                <Form
+                                    form={FormLogin}
+                                    onFinish={handleLogin}
+                                    layout="vertical"
+                                >
+                                    <div className="text-xs mb-2">Username<span className="text-red-500">*</span></div>
+                                    <Form.Item
+                                        name="username"
+                                        rules={[{ 'required': true, }]}
+                                    >
+                                        <Input size="large" />
+                                    </Form.Item>
+                                    <div className="text-xs mb-2">Password<span className="text-red-500">*</span></div>
+                                    <Form.Item
+                                        name="password"
+                                        rules={[{ 'required': true, }]}
+                                    >
+                                        <Input.Password size="large" />
+                                    </Form.Item>
+
+                                    <button
+                                        className="bg-blue-600 w-full py-2 rounded text-white font-semibold mt-5"
+                                        style={{ backgroundColor: '#0080FB' }}
+                                    >
+                                        Masuk
+                                    </button>
+                                </Form>
                             </div>
-                        }
+                        </div>
+                    </Col>
+                    <Col lg={12} span={24} className="disnone">
+                        <img className="h-screen w-full" src="sawah.png"></img>
 
-                    />
-                </div>
-
-                {
-                    activeMenu == "fertilizer" ?
-                        (
-                            <ListItem
-                                regionState={regionState}
-                                regionData={regionData}
-                                setRegionName={setRegionName}
-                                setCommodityType={setCommodityType}
-                                setFertilizerType={setFertilizerType}
-                                commodityType={commodityType}
-                                fertilizerType={fertilizerType}
-                            />
-                        ) :
-                        (
-                            <ListUmur
-                                umurType={umurType}
-                                setUmurType={setUmurType}
-                                regionState={regionState}
-                                regionData={regionData}
-                                setRegionName={setRegionName}
-                            />
-                        )
-                }
-            </div>
-
-            {
-                activeMenu == "fertilizer" ?
-                    (
-                        <LazyMap
-                            regionState={regionState}
-                            setRegionState={setRegionState}
-                            commodityType={commodityType}
-                            fertilizerType={fertilizerType}
-                            setRegionData={setRegionData}
-                        />
-                    ) :
-                    (
-                        <LazyMapUmur
-
-                            regionState={regionState}
-                            setRegionState={setRegionState}
-                            umurType={umurType}
-                            setRegionData={setRegionData}
-                        />
-                    )
-            }
-        </LayoutDashboard>
+                    </Col>
+                </Row>
+            </main>
+        </Spin>
     )
 }
